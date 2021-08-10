@@ -26,6 +26,7 @@ class DeveloperPortal::LoginController < DeveloperPortal::BaseController
 
   def create
     logout_keeping_session!
+    return render_creation_error('Spam protection failed.') unless spam_check(buyer)
 
     if sign_in_user
       self.current_user = @user
@@ -35,8 +36,6 @@ class DeveloperPortal::LoginController < DeveloperPortal::BaseController
     elsif @strategy.redirects_to_signup?
       @strategy.on_signup(session)
       redirect_to @strategy.signup_path(params), notice: 'Successfully authenticated, please complete the signup form'
-    elsif !spam_check(@user)
-      render_creation_error('Spam protection failed.')
     else
       render_creation_error
     end
@@ -50,6 +49,10 @@ class DeveloperPortal::LoginController < DeveloperPortal::BaseController
   end
 
   private
+
+  def buyer
+    @buyer ||= site_account.buyers.build
+  end
 
   def sign_in_user
     @user = @strategy.authenticate(params.merge(request: request))

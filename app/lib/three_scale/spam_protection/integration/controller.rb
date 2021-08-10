@@ -20,8 +20,9 @@ module ThreeScale::SpamProtection
         when :none
           true
         when :auto
-          if object.spam?
-            session_store.new(request.session).mark_possible_spam
+          stored_session = session_store.new(request.session)
+          if object.spam? && stored_session.marked_as_possible_spam?
+            stored_session.mark_possible_spam
             Rails.logger.debug "[SpamProtection][Integration] Captcha filled and object is spam - verifying captcha"
             verify_captcha(object)
           else
