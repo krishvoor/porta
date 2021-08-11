@@ -20,24 +20,19 @@ module ThreeScale::SpamProtection
         when :none
           true
         when :auto
-          auto_check(object, session_store)
+          if object.spam?
+            session_store.new(request.session).mark_possible_spam
+            Rails.logger.debug "[SpamProtection][Integration] Captcha filled and object is spam - verifying captcha"
+            verify_captcha(object)
+          else
+            Rails.logger.debug "[SpamProtection][Integration] Not Spam"
+            true
+          end
         when :captcha
           Rails.logger.debug "[SpamProtection][Integration] Captcha mode - verifying captcha"
           verify_captcha(object)
         else
           System::ErrorReporting.report_error "Unknown spam_protection level: #{level}"
-        end
-      end
-
-      def auto_check(object, session_store)
-        stored_session = session_store.new(request.session)
-        if object.spam? && stored_session.marked_as_possible_spam?
-          stored_session.mark_possible_spam
-          Rails.logger.debug "[SpamProtection][Integration] Captcha filled and object is spam - verifying captcha"
-          verify_captcha(object)
-        else
-          Rails.logger.debug "[SpamProtection][Integration] Not Spam"
-          true
         end
       end
     end
