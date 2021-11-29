@@ -42,6 +42,7 @@ fi
 
 # hack for system-builder ENV
 rm -rf /opt/system/vendor/oracle
+ln -s /opt/oracle/instantclient_19_3 /opt/oracle/instantclient_19_6
 ln -sf /opt/oracle/instantclient_19_6/libsqora.so.19.1 /opt/oracle/instantclient_19_6/libsqora.so
 ln -sf /opt/oracle/instantclient_19_6 /opt/oracle/instantclient
 cp config/oracle/*.ini /etc/
